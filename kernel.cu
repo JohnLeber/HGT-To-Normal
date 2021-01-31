@@ -13,7 +13,74 @@ const int NORM_DIM = 3600;//resolution of normal map.
 const float NORM_DIM_F = 3600.0f;
 const int NormalMapSize = NORM_DIM * NORM_DIM;
 const int arraySize = HGT_DIM * HGT_DIM;
- 
+//--------------------------------------------------------------------------------//
+cudaError_t HGTtoNormalCuda(float3*c, const short*a, unsigned int size, unsigned int normalmapsize);
+//--------------------------------------------------------------------------------//
+// Kernel Helper functions
+__device__  float3 normalize(float3 v)
+{
+    double len = sqrt((float)(v.x * v.x + v.y * v.y + v.z * v.z));
+    v.x /= len;
+    v.y /= len;
+    v.z /= len;
+    return v;
+}
+//--------------------------------------------------------------------------------//
+__device__ float3 CalcNormal(float p1x, float p1y, float p1z, float p2x, float p2y, float p2z, float p3x, float p3y, float p3z)
+{
+    long nScale = 30;//approximately 30 meters per point for high resolution HGT files (90 when using the low res HGT format)
+    p1x = p1x * nScale;
+    p1y = p1y * nScale;
+    p2x = p2x * nScale;
+    p2y = p2y * nScale;
+    p3x = p3x * nScale;
+    p3y = p3y * nScale;
+    float Ax = p2x - p1x;
+    float Ay = p2y - p1y;
+    float Az = p2z - p1z;
+    float Bx = p3x - p1x;
+    float By = p3y - p1y;
+    float Bz = p3z - p1z;
+    float3 n;
+    n.x = Ay * Bz - Az * By;
+    n.y = Az * Bx - Ax * Bz;
+    n.z = Ax * By - Ay * Bx;
+    n = normalize(n);
+    return n;
+}
+//--------------------------------------------------------------------------------//
+__device__ float GetHeight(const short* a, int h, int j)
+{
+    int tid = j * HGT_DIM + h;
+    return (float)a[tid];
+}
+//--------------------------------------------------------------------------------//
+//main Kernel
+__global__ void HGTToNormalKernel(float3* pNormal, const short* pHGT, int count)
+{  
+    int threadsPerBlock = blockDim.x * blockDim.y * blockDim.z;
+    int threadPosInBlock = threadIdx.x + 
+        blockDim.x * threadIdx.y +
+        blockDim.x * blockDim.y * threadIdx.z;
+    int blockPosInGrid = blockIdx.x +
+        gridDim.x * blockIdx.y +
+        gridDim.x * gridDim.y * blockIdx.z;
+    int tid = blockPosInGrid * threadsPerBlock + threadPosInBlock;//calculate global indiex to array
+    if (tid < count)
+    {  
+        int h = tid % NORM_DIM;
+        int j = tid / NORM_DIM;
+        //calculate the normal for the two adjacent triangles in this cell and average them
+        float3 v3a = CalcNormal(h, j, GetHeight(pHGT, h, j), h + 1, j, GetHeight(pHGT, h + 1, j), h, j + 1, GetHeight(pHGT, h, j + 1));
+        float3 v3b = CalcNormal(h + 1, j, GetHeight(pHGT, h + 1, j), h + 1, j + 1, GetHeight(pHGT, h + 1, j + 1), h, j + 1, GetHeight(pHGT, h, j + 1) );
+        float3 vNornmal;
+        vNornmal.x = (v3a.x + v3b.x) / 2;
+        vNornmal.y = (v3a.y + v3b.y) / 2;
+        vNornmal.z = (v3a.z + v3b.z) / 2;
+        pNormal[tid] = normalize(vNornmal);
+    }
+}
+
 //--------------------------------------------------------------------------------//
 //function to save as bitmap (Windows only)
 bool SaveBitmapRGB(BYTE* Buffer, int width, int height, long paddedsize, LPCTSTR bmpfile)
@@ -71,73 +138,6 @@ bool SaveBitmapRGB(BYTE* Buffer, int width, int height, long paddedsize, LPCTSTR
     CloseHandle(file);
     return true;
 }
-//--------------------------------------------------------------------------------//
-cudaError_t HGTtoNormalCuda(float3*c, const short*a, unsigned int size, unsigned int normalmapsize);
-//--------------------------------------------------------------------------------//
-// Kernel Helper functions
-__device__  float3 normalize(float3 v)
-{
-    double len = sqrt((float)(v.x * v.x + v.y * v.y + v.z * v.z));
-    v.x /= len;
-    v.y /= len;
-    v.z /= len;
-    return v;
-}
-//--------------------------------------------------------------------------------//
-__device__ float3 GetNormal(float p1x, float p1y, float p1z, float p2x, float p2y, float p2z, float p3x, float p3y, float p3z)
-{
-    long nScale = 30;//approximately 30 meters per point for high resolution HGT files (90 when using the low res HGT format)
-    p1x = p1x * nScale;
-    p1y = p1y * nScale;
-    p2x = p2x * nScale;
-    p2y = p2y * nScale;
-    p3x = p3x * nScale;
-    p3y = p3y * nScale;
-    float Ax = p2x - p1x;
-    float Ay = p2y - p1y;
-    float Az = p2z - p1z;
-    float Bx = p3x - p1x;
-    float By = p3y - p1y;
-    float Bz = p3z - p1z;
-    float3 n;
-    n.x = Ay * Bz - Az * By;
-    n.y = Az * Bx - Ax * Bz;
-    n.z = Ax * By - Ay * Bx;
-    n = normalize(n);
-    return n;
-}
-//--------------------------------------------------------------------------------//
-__device__ float GetHeight(const short* a, int h, int j)
-{
-    int tid = j * HGT_DIM + h;
-    return (float)a[tid];
-}
-//--------------------------------------------------------------------------------//
-//main Kernel
-__global__ void HGTToNormalKernel(float3* pNormal, const short* pHGT, int count)
-{  
-    int threadsPerBlock = blockDim.x * blockDim.y * blockDim.z;
-    int threadPosInBlock = threadIdx.x + 
-        blockDim.x * threadIdx.y +
-        blockDim.x * blockDim.y * threadIdx.z;
-    int blockPosInGrid = blockIdx.x +
-        gridDim.x * blockIdx.y +
-        gridDim.x * gridDim.y * blockIdx.z;
-    int tid = blockPosInGrid * threadsPerBlock + threadPosInBlock;//calulcate global indiex to array
-    if (tid < count)
-    {  
-        int h = tid % NORM_DIM;
-        int j = tid / NORM_DIM;
-        //calulcate the normal for the two adjacent triangles in this cell and average them
-        float3 v3a = GetNormal(h, j, GetHeight(pHGT, h, j), h + 1, j, GetHeight(pHGT, h + 1, j), h, j + 1, GetHeight(pHGT, h, j + 1));
-        float3 v3b = GetNormal(h + 1, j, GetHeight(pHGT, h + 1, j), h + 1, j + 1, GetHeight(pHGT, h + 1, j + 1), h, j + 1, GetHeight(pHGT, h, j + 1) );
-        float3 vNornmal;
-        vNornmal.x = (v3a.x + v3b.x) / 2;
-        vNornmal.y = (v3a.y + v3b.y) / 2;
-        vNornmal.z = (v3a.z + v3b.z) / 2;
-        pNormal[tid] = normalize(vNornmal);
-    }
-}
 //-----------------------------------------------------------------------------------// 
 int main()
 {    
@@ -165,7 +165,7 @@ int main()
         }
 
 
-        //Calulcate the normal map.
+        //Calculate the normal map.
         cudaError_t cudaStatus = HGTtoNormalCuda(pNormData, pHGTData, arraySize, NormalMapSize);
         if (cudaStatus == cudaSuccess) {
 

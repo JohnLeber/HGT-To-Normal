@@ -6,11 +6,14 @@ The output file is a 3600 by 3600 bitmap file containing the normals in tangent 
 
 The code should be reasonably easy to adapt to height maps and depth maps of different sizes.
 
-The images below show a normal map and relief map (top and bottom images respectively) of the [S40E175.hgt](https://github.com/nodecomplete/NZDEM-HGT-30/blob/master/HGT/S40E175.zip) file (Tongariro National Park, New Zealand).
+The images below show a normal map and relief map (top and bottom images respectively) of the [S44E170.hgt](https://github.com/nodecomplete/NZDEM-HGT-30/blob/master/HGT/S44E170.zip) file (West Coast/Southern Alps of New Zealand).
+
+![alt text](https://github.com/nodecomplete/HGTToNormal/blob/master/NormalMapCUDA2.jpg)
+![alt text](https://github.com/nodecomplete/HGT-To-Normal/blob/master/ReliefMap2.jpg)
+
+More samples, in this case Tongariro National Park [S40E175.hgt](https://github.com/nodecomplete/NZDEM-HGT-30/blob/master/HGT/S40E175.zip)
 
 ![alt text](https://github.com/nodecomplete/HGTToNormal/blob/master/NormalMapCUDA.jpg)
 ![alt text](https://github.com/nodecomplete/HGT-To-Normal/blob/master/ReliefMap.jpg)
 
-More samples from the West Coast/Southern Alps of New Zealand (S44E170.hgt)
-![alt text](https://github.com/nodecomplete/HGTToNormal/blob/master/NormalMapCUDA2.jpg)
-![alt text](https://github.com/nodecomplete/HGT-To-Normal/blob/master/ReliefMap2.jpg)
+

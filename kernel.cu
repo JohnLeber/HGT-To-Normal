@@ -26,6 +26,7 @@ __device__  float3 normalize(float3 v)
     return v;
 }
 //--------------------------------------------------------------------------------//
+//Calculate the normal vector of a triangle
 __device__ float3 CalcNormal(float p1x, float p1y, float p1z, float p2x, float p2y, float p2z, float p3x, float p3y, float p3z)
 {
     long nScale = 30;//approximately 30 meters per point for high resolution HGT files (90 when using the low res HGT format)

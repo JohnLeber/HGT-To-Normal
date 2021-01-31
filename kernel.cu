@@ -80,7 +80,6 @@ __global__ void HGTToNormalKernel(float3* pNormal, const short* pHGT, int count)
         pNormal[tid] = normalize(vNornmal);
     }
 }
-
 //--------------------------------------------------------------------------------//
 //function to save as bitmap (Windows only)
 bool SaveBitmapRGB(BYTE* Buffer, int width, int height, long paddedsize, LPCTSTR bmpfile)
@@ -141,8 +140,9 @@ bool SaveBitmapRGB(BYTE* Buffer, int width, int height, long paddedsize, LPCTSTR
 //-----------------------------------------------------------------------------------// 
 int main()
 {    
-    short* pHGTData = new short[arraySize]; 
-    float3* pNormData = new float3[NormalMapSize];
+    //TODO: update following two lines to use std::unique_ptr
+    short* pHGTData = new short[arraySize]; //stores the HGT data we load form disk
+    float3* pNormData = new float3[NormalMapSize];//Will contain the normal map data output by CUDA
 
     //load HGT file and reverse the byte order
     FILE* pFile = 0;
@@ -158,33 +158,36 @@ int main()
         }
         fclose(pFile);
 
+        //swap bytes around
         for (int h = 0; h < HGT_DIM * HGT_DIM; h++)
         {
             short w = pHGTData[h];
             pHGTData[h] = MAKEWORD(HIBYTE(w), LOBYTE(w));
         }
-
-
-        //Calculate the normal map.
+         
+        //Calculate the normal map using CUDA
         cudaError_t cudaStatus = HGTtoNormalCuda(pNormData, pHGTData, arraySize, NormalMapSize);
-        if (cudaStatus == cudaSuccess) {
-
+        if (cudaStatus == cudaSuccess) { 
             printf(" c[0].xyz = {%f,%f,%f}\n", pNormData[0].x, pNormData[1].y, pNormData[2].z);
             //save as a bitmap to view the normals. Normals are in Tangent space
             BYTE* pBMPData = new BYTE[NORM_DIM * NORM_DIM * 3];
-            for (int h = 0; h < NORM_DIM; h++)
+            if (pBMPData)
             {
-                for (int j = 0; j < NORM_DIM; j++)
+                for (int h = 0; h < NORM_DIM; h++)
                 {
-                    float3 normal = pNormData[h * NORM_DIM + j];
-                    pBMPData[(NORM_DIM - h - 1) * NORM_DIM * 3 + j * 3 + 0] = 255 * (0.5 + 0.5 * normal.z);
-                    pBMPData[(NORM_DIM - h - 1) * NORM_DIM * 3 + j * 3 + 1] = 255 * (0.5 + 0.5 * -1 * normal.x);//invert green axis
-                    pBMPData[(NORM_DIM - h - 1) * NORM_DIM * 3 + j * 3 + 2] = 255 * (0.5 + 0.5 * normal.y);
-                    //hmmm is red and green reversed?? Had to swap y and x around...
+                    for (int j = 0; j < NORM_DIM; j++)
+                    {
+                        //get normal vector and encode into RGB components of the bitmap. Note, normals will be in Tangent space
+                        float3 normal = pNormData[h * NORM_DIM + j];
+                        pBMPData[(NORM_DIM - h - 1) * NORM_DIM * 3 + j * 3 + 0] = 255 * (0.5 + 0.5 * normal.z);
+                        pBMPData[(NORM_DIM - h - 1) * NORM_DIM * 3 + j * 3 + 1] = 255 * (0.5 + 0.5 * -1 * normal.x);//invert green axis
+                        pBMPData[(NORM_DIM - h - 1) * NORM_DIM * 3 + j * 3 + 2] = 255 * (0.5 + 0.5 * normal.y);
+                        //hmmm is red and green reversed?? Had to swap y and x around...
+                    }
                 }
+                SaveBitmapRGB(pBMPData, NORM_DIM, NORM_DIM, NORM_DIM * NORM_DIM * 3, outputfile);
+                delete[] pBMPData;//should use unique_ptr...
             }
-            SaveBitmapRGB(pBMPData, NORM_DIM, NORM_DIM, NORM_DIM * NORM_DIM * 3, outputfile);
-            delete[] pBMPData;
 
             // cudaDeviceReset must be called before exiting in order for profiling and
             // tracing tools such as Nsight and Visual Profiler to show complete traces.
@@ -199,6 +202,7 @@ int main()
             fprintf(stderr, "HGTtoNormalCuda failed!");
         }
     }
+    //release memory (yes, should really use unique_ptr...)
     delete[] pHGTData;
     delete[] pNormData;
 
@@ -257,7 +261,7 @@ cudaError_t HGTtoNormalCuda(float3 * pNormData, const short* pHGTData,  unsigned
     // any errors encountered during the launch.
     cudaStatus = cudaDeviceSynchronize();
     if (cudaStatus != cudaSuccess) {
-        fprintf(stderr, "cudaDeviceSynchronize returned error code %d after launching addKernel!\n", cudaStatus);
+        fprintf(stderr, "cudaDeviceSynchronize returned error code %d after launching HGTToNormalKernel!\n", cudaStatus);
         goto Error;
     }
 

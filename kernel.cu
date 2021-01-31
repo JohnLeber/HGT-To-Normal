@@ -4,7 +4,7 @@
 #include <Windows.h>//needed to save output as a bitmap file.
 #include <stdio.h>
 
-const char inputpath[] = { "D:\\HGT2\\S40E175.hgt" };//source path for the HGT file
+const char inputpath[] = { "D:\\HGT2\\S44E170.hgt" };//source path for the HGT file
 const char outputfile[] = { "D:\\HGT2\\_Output\\NormalMapCUDA.bmp" };//path to dump the output file (normal map)
 
 const short HGT_DIM = 3601;//resolution of HGT files (1 arc-second)

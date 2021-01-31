@@ -66,7 +66,7 @@ __global__ void HGTToNormalKernel(float3* pNormal, const short* pHGT, int count)
     int blockPosInGrid = blockIdx.x +
         gridDim.x * blockIdx.y +
         gridDim.x * gridDim.y * blockIdx.z;
-    int tid = blockPosInGrid * threadsPerBlock + threadPosInBlock;//calculate global indiex to array
+    int tid = blockPosInGrid * threadsPerBlock + threadPosInBlock;//calculate global index to array
     if (tid < count)
     {  
         int h = tid % NORM_DIM;

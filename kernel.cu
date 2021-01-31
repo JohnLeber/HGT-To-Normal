@@ -1,16 +1,17 @@
 
 #include "cuda_runtime.h"
 #include "device_launch_parameters.h"
-#include <Windows.h>//nneed to save as bitmap
+#include <Windows.h>//needed to save output as a bitmap file.
 #include <stdio.h>
 
-const char inputpath[] = { "D:\\HGT2\\S40E175.hgt" };
-const char outputfile[] = { "D:\\HGT2\\_Output\\NormalMapCUDA.bmp" };
+const char inputpath[] = { "D:\\HGT2\\S40E175.hgt" };//source patrh for the HGT file
+const char outputfile[] = { "D:\\HGT2\\_Output\\NormalMapCUDA.bmp" };//path to dump the output file (normal map)
 
-const short HGT_DIM = 3601;
-const int NORM_DIM = 3600;
+const short HGT_DIM = 3601;//resolution of HGT files (1 arc-second)
+const int NORM_DIM = 3600;//resolution of normal map. 
+//Note HGT files are  conveniently 3601 so we don't have problems loading adjadaent HGT files to get the correct values at the border.
 const float NORM_DIM_F = 3600.0f;
-const int NormalMapSize = 3600 * 3600;
+const int NormalMapSize = NORM_DIM * NORM_DIM;
 const int arraySize = HGT_DIM * HGT_DIM;
  
 //--------------------------------------------------------------------------------//
@@ -73,7 +74,7 @@ bool SaveBitmapRGB(BYTE* Buffer, int width, int height, long paddedsize, LPCTSTR
 //--------------------------------------------------------------------------------//
 cudaError_t HGTtoNormalCuda(float3*c, const short*a, unsigned int size, unsigned int normalmapsize);
 //--------------------------------------------------------------------------------//
-// Kernal Helper functions
+// Kernel Helper functions
 __device__  float3 normalize(float3 v)
 {
     double len = sqrt((float)(v.x * v.x + v.y * v.y + v.z * v.z));
@@ -127,7 +128,7 @@ __global__ void HGTToNormalKernel(float3*c, const short*a, int count)
     {  
         int h = tid % NORM_DIM;
         int j = tid / NORM_DIM;
-        //calulcate the normal for the two adjencet triansgle in this cell and average them
+        //calulcate the normal for the two adjacent triangles in this cell and average them
         float3 v3a = GetNormal(h, j, GetHeight(a, h, j), h + 1, j, GetHeight(a, h + 1, j), h, j + 1, GetHeight(a, h, j + 1));
         float3 v3b = GetNormal(h + 1, j, GetHeight(a, h + 1, j), h + 1, j + 1, GetHeight(a, h + 1, j + 1), h, j + 1, GetHeight(a, h, j + 1) );
         float3 vNornmal;

@@ -1,4 +1,4 @@
-# HGTToNormal
+# HGT-To-Normal
 
 Sample CUDA code to convert a high resolution HGT/SRTM file and use CUDA to output a normal map. Can be used to help create relief maps (bottom image).
 

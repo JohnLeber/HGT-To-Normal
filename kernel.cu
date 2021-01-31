@@ -4,12 +4,12 @@
 #include <Windows.h>//needed to save output as a bitmap file.
 #include <stdio.h>
 
-const char inputpath[] = { "D:\\HGT2\\S40E175.hgt" };//source patrh for the HGT file
+const char inputpath[] = { "D:\\HGT2\\S40E175.hgt" };//source path for the HGT file
 const char outputfile[] = { "D:\\HGT2\\_Output\\NormalMapCUDA.bmp" };//path to dump the output file (normal map)
 
 const short HGT_DIM = 3601;//resolution of HGT files (1 arc-second)
 const int NORM_DIM = 3600;//resolution of normal map. 
-//Note HGT files are conveniently 3601 by 3601 (instead of just 3600 by 3600) so we don't have problems loading adjadaent HGT files to get the correct values at the border.
+//Note HGT files are conveniently 3601 by 3601 (instead of just 3600 by 3600) so we don't have problems loading adjacent HGT files to get the correct values at the border.
 const float NORM_DIM_F = 3600.0f;
 const int NormalMapSize = NORM_DIM * NORM_DIM;
 const int arraySize = HGT_DIM * HGT_DIM;

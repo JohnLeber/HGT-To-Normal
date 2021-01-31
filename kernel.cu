@@ -242,8 +242,7 @@ cudaError_t HGTtoNormalCuda(float3 * pNormData, const short* pHGTData,  unsigned
         fprintf(stderr, "cudaMemcpy failed!");
         goto Error;
     }
-
-
+     
     // Launch a kernel on the GPU with one thread for each element.
     const int count = NORM_DIM * NORM_DIM;
     dim3 block(8, 8, 8);

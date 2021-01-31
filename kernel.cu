@@ -12,7 +12,7 @@ const int NORM_DIM = 3600;//resolution of normal map.
 //Note HGT files are conveniently 3601 by 3601 (instead of just 3600 by 3600) so we don't have problems loading adjacent HGT files to get the correct values at the border.
 const float NORM_DIM_F = 3600.0f;
 const int NormalMapSize = NORM_DIM * NORM_DIM;
-const int arraySize = HGT_DIM * HGT_DIM;
+const int HGTArraySize = HGT_DIM * HGT_DIM;
 //--------------------------------------------------------------------------------//
 cudaError_t HGTtoNormalCuda(float3*c, const short*a, unsigned int size, unsigned int normalmapsize);
 //--------------------------------------------------------------------------------//
@@ -141,7 +141,7 @@ bool SaveBitmapRGB(BYTE* Buffer, int width, int height, long paddedsize, LPCTSTR
 int main()
 {    
     //TODO: update following two lines to use std::unique_ptr
-    short* pHGTData = new short[arraySize]; //stores the HGT data we load form disk
+    short* pHGTData = new short[HGTArraySize]; //stores the HGT data we load form disk
     float3* pNormData = new float3[NormalMapSize];//Will contain the normal map data output by CUDA
 
     //load HGT file and reverse the byte order
@@ -166,7 +166,7 @@ int main()
         }
          
         //Calculate the normal map using CUDA
-        cudaError_t cudaStatus = HGTtoNormalCuda(pNormData, pHGTData, arraySize, NormalMapSize);
+        cudaError_t cudaStatus = HGTtoNormalCuda(pNormData, pHGTData, HGTArraySize, NormalMapSize);
         if (cudaStatus == cudaSuccess) { 
             printf(" c[0].xyz = {%f,%f,%f}\n", pNormData[0].x, pNormData[1].y, pNormData[2].z);
             //save as a bitmap to view the normals. Normals are in Tangent space

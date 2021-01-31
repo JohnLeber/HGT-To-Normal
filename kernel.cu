@@ -89,13 +89,11 @@ bool SaveBitmapRGB(BYTE* Buffer, int width, int height, long paddedsize, LPCTSTR
     BITMAPINFOHEADER info;
     memset(&bmfh, 0, sizeof(BITMAPFILEHEADER));
     memset(&info, 0, sizeof(BITMAPINFOHEADER));
-
-    bmfh.bfType = 0x4d42;       // 0x4d42 = 'BM'
+    bmfh.bfType = 0x4d42;
     bmfh.bfReserved1 = 0;
     bmfh.bfReserved2 = 0;
     bmfh.bfSize = sizeof(BITMAPFILEHEADER) + sizeof(BITMAPINFOHEADER) + paddedsize;
     bmfh.bfOffBits = 0x36;
-
     info.biSize = sizeof(BITMAPINFOHEADER);
     info.biWidth = width;
     info.biHeight = height;

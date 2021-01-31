@@ -114,7 +114,7 @@ __device__ float GetHeight(const short* a, int h, int j)
 }
 //--------------------------------------------------------------------------------//
 //main Kernal
-__global__ void HGTToNormalKernel(float3*c, const short*a, int count)
+__global__ void HGTToNormalKernel(float3* pNormal, const short* pHGT, int count)
 {  
     int threadsPerBlock = blockDim.x * blockDim.y * blockDim.z;
     int threadPosInBlock = threadIdx.x + 
@@ -129,13 +129,13 @@ __global__ void HGTToNormalKernel(float3*c, const short*a, int count)
         int h = tid % NORM_DIM;
         int j = tid / NORM_DIM;
         //calulcate the normal for the two adjacent triangles in this cell and average them
-        float3 v3a = GetNormal(h, j, GetHeight(a, h, j), h + 1, j, GetHeight(a, h + 1, j), h, j + 1, GetHeight(a, h, j + 1));
-        float3 v3b = GetNormal(h + 1, j, GetHeight(a, h + 1, j), h + 1, j + 1, GetHeight(a, h + 1, j + 1), h, j + 1, GetHeight(a, h, j + 1) );
+        float3 v3a = GetNormal(h, j, GetHeight(pHGT, h, j), h + 1, j, GetHeight(pHGT, h + 1, j), h, j + 1, GetHeight(pHGT, h, j + 1));
+        float3 v3b = GetNormal(h + 1, j, GetHeight(pHGT, h + 1, j), h + 1, j + 1, GetHeight(pHGT, h + 1, j + 1), h, j + 1, GetHeight(pHGT, h, j + 1) );
         float3 vNornmal;
         vNornmal.x = (v3a.x + v3b.x) / 2;
         vNornmal.y = (v3a.y + v3b.y) / 2;
         vNornmal.z = (v3a.z + v3b.z) / 2;
-        c[tid] = normalize(vNornmal); 
+        pNormal[tid] = normalize(vNornmal);
     }
 }
 //-----------------------------------------------------------------------------------// 

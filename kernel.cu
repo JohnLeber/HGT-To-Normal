@@ -113,7 +113,7 @@ __device__ float GetHeight(const short* a, int h, int j)
     return (float)a[tid];
 }
 //--------------------------------------------------------------------------------//
-//main Kernal
+//main Kernel
 __global__ void HGTToNormalKernel(float3* pNormal, const short* pHGT, int count)
 {  
     int threadsPerBlock = blockDim.x * blockDim.y * blockDim.z;

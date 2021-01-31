@@ -1,6 +1,7 @@
 # HGT-To-Normal
 
-Sample CUDA code to convert a high resolution HGT/SRTM file and use CUDA to output a normal map. Can be used to help create relief maps (bottom image).
+Sample CUDA code to convert a high resolution HGT/SRTM file and use CUDA to output a normal map. The normal map can be used to help create relief maps (bottom image).
+For more about HGT files see my other [project](https://github.com/nodecomplete/NZDEM-HGT-30).
 
 The images below show a normal map and relief map (top and bottom images respectively) of the S40E175.hgt file (Tongariro National Park, New Zealand).
 

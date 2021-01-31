@@ -10,3 +10,7 @@ The images below show a normal map and relief map (top and bottom images respect
 
 ![alt text](https://github.com/nodecomplete/HGTToNormal/blob/master/NormalMapCUDA.jpg)
 ![alt text](https://github.com/nodecomplete/HGT-To-Normal/blob/master/ReliefMap.jpg)
+
+More samples from the West Coast/Southern Alps of New Zealand (S44E170.hgt)
+![alt text](https://github.com/nodecomplete/HGTToNormal/blob/master/NormalMapCUDA2.jpg)
+![alt text](https://github.com/nodecomplete/HGT-To-Normal/blob/master/ReliefMap2.jpg)

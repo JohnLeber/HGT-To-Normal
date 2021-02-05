@@ -1,6 +1,8 @@
 # HGT-To-Normal
 
-Sample CUDA code to create a normal map from a high resolution HGT file. The normal map can be used to help create relief maps (bottom image).
+Sample CUDA code to create a normal map from a high resolution HGT file. 
+
+The normal map can be used to help create relief maps (bottom image).
 The code expects a high resolution HGT file ( 1 arc-second ). These files are 3601 by 3601 and contain the height in meters stored as a 16 bit value.
 The output file is a 3600 by 3600 bitmap file containing the normals in tangent space. For more information about HGT files see my other [project](https://github.com/nodecomplete/NZDEM-HGT-30).
 

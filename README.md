@@ -8,7 +8,7 @@ The output file is a 3600 by 3600 bitmap file containing the normals in tangent 
 
 The code should be reasonably easy to adapt to height maps and depth maps of different sizes.
 
-For a CPU based approach to creating normal maps (and relief maps from HGT files) see my other [HGT Relief Map project](https://github.com/nodecomplete/HGT-Relief-Map).
+For a CPU based approach to creating normal maps from HGT files, see my other [HGT Relief Map project](https://github.com/nodecomplete/HGT-Relief-Map).
 
 The images below show a normal map and relief map (top and bottom images respectively) of the [S44E170.hgt](https://github.com/nodecomplete/NZDEM-HGT-30/blob/master/HGT/S44E170.zip) file (West Coast/Southern Alps of New Zealand).
 
